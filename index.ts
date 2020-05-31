@@ -1,6 +1,6 @@
 const { args } = Deno;
 import { parse } from "https://deno.land/std/flags/mod.ts";
-import { create, list, remove } from './src/commands.ts';
+import { complete, create, list, remove } from './src/commands.ts';
 import { process } from "https://deno.land/std/node/process.ts";
 
 interface CommandList {
@@ -9,9 +9,10 @@ interface CommandList {
 
 function parseCommand(command: string) {
   const possibleCommands: CommandList = {
-    create: create,
-    list: list,
-    remove: remove
+    complete,
+    create,
+    list,
+    remove
   };
   return possibleCommands[command];
 }

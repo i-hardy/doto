@@ -15,7 +15,7 @@ export interface Doto {
   dueBy: string;
 }
 
-interface DotoFile {
+export interface DotoFile {
   dotoList: Array<Doto>
 }
 
