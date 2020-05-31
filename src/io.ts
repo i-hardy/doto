@@ -3,11 +3,23 @@ import { ensureFile, readJson, writeJson } from 'https://deno.land/std/fs/mod.ts
 
 const dotoFilePath = `${homedir()}/.doto/dotos.json`;
 
-interface DotoFile {
-  dotoList: Array<string>
+export enum DotoStatus {
+  DUE = "DUE",
+  OVERDUE = "OVERDUE",
+  DONE = "DONE"
 }
 
-export async function writeDotos(content: object) {
+export interface Doto {
+  text: string;
+  status: DotoStatus;
+  dueBy: string;
+}
+
+interface DotoFile {
+  dotoList: Array<Doto>
+}
+
+export async function writeDotos(content: DotoFile) {
   return writeJson(dotoFilePath, content, { spaces: 2 })
 }
 
@@ -21,6 +33,6 @@ export async function ensure() {
   try {
     await readJson(dotoFilePath);
   } catch (error) {
-    await writeDotos({})
+    await writeDotos({ dotoList: [] })
   }
 }
