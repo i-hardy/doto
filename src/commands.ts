@@ -1,3 +1,4 @@
+import { process } from "https://deno.land/std/node/process.ts";
 import { Doto, DotoFile, DotoStatus } from './io.ts';
 
 function newDoto(text: string): Doto {
@@ -34,7 +35,7 @@ function updateDotos(dotoFunction: Function) {
 
 export const create = updateDotos(function createDoto(dotoFile: DotoFile, text: string) {
   dotoFile.dotoList.push(newDoto(text));
-  console.log(`Created doto: ${text}`);
+  console.log(`Created doto: ${text}\n`);
   return dotoFile;
 })
 
@@ -49,7 +50,7 @@ export const complete = updateDotos(function completeDoto(dotoFile: DotoFile, do
   const targetIndex = parseInt(dotoIndex) - 1;
   const targetDoto = dotoFile.dotoList[targetIndex];
   targetDoto.status = DotoStatus.DONE;
-  console.log(`Completed doto: ${targetDoto.text}`);
+  console.log(`Completed doto: ${targetDoto.text}\n`);
   return dotoFile;
 })
 
@@ -57,6 +58,10 @@ export const remove = updateDotos(function remove(dotoFile: DotoFile, dotoIndex:
   const targetIndex = parseInt(dotoIndex) - 1;
   const removingDoto = dotoFile.dotoList[targetIndex];
   dotoFile.dotoList.splice(targetIndex, 1);
-  console.log(`Removed doto: ${removingDoto.text}`);
+  console.log(`Removed doto: ${removingDoto.text}\n`);
   return dotoFile;
 })
+
+export const exit = function exit() {
+  return process.exit(0);
+}

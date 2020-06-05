@@ -1,8 +1,6 @@
-const { args } = Deno;
-import { parse } from "https://deno.land/std/flags/mod.ts";
-import { process } from "https://deno.land/std/node/process.ts";
-import { complete, create, list, remove } from './src/commands.ts';
-import { ensure, readDotos, writeDotos } from './src/io.ts';
+const { stdin, stdout } = Deno;
+import { complete, create, exit, list, remove } from './src/commands.ts';
+import { ensure, readDotos, writeDotos, DotoFile } from './src/io.ts';
 
 interface CommandList {
   [key: string]: Function
@@ -12,18 +10,36 @@ function parseCommand(command: string) {
   const possibleCommands: CommandList = {
     complete,
     create,
+    exit,
     list,
     remove
   };
   return possibleCommands[command];
 }
 
+async function getCommand() {
+  const buf = new Uint8Array(1024);
+  const n = <number>await stdin.read(buf);
+  const answer = new TextDecoder().decode(buf.subarray(0, n));
+  const command = answer.match(/[a-z]+\b/) || [];
+  return [command[0], answer];
+}
+
+async function loop(file: DotoFile): Promise<DotoFile> {
+  await writeDotos(file);
+  const [command, answer] = await getCommand();
+  if (command) {
+    const input = answer.replace(command, '').trim();
+    const updatedFile = parseCommand(command)(file, input);
+    return loop(updatedFile);
+  }
+  return loop(file);
+}
+
 (async function run() {
-  const { _ } = parse(args);
-  const dotoInput = _.map(arg => arg.toString());
-  if (!dotoInput[0]) process.exit(0);
   await ensure();
   const file = await readDotos();
-  const updatedFile = parseCommand(dotoInput[0])(file, dotoInput[1]);
-  writeDotos(updatedFile)
+  const initialFile = list(file);
+  await stdout.write(new TextEncoder().encode("\nWhat would you like to do?\n"));
+  loop(initialFile);
 })();
